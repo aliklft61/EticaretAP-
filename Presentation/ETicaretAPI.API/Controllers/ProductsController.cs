@@ -1,4 +1,5 @@
 ﻿using ETicaretAPI.Application.Repositories;
+using ETicaretAPI.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,23 +11,29 @@ namespace ETicaretAPI.API.Controllers
     {
         readonly private IProductReadRepository _productReadRepository;
         readonly private IProductWriteRepository _productWriteRepository;
+        readonly private IOrderWriteRepository _orderWriteRepository;
+        readonly private ICustomerWriteRepository _customerWriteRepository;
+        readonly private IOrderReadRepository _orderReadRepository;
 
-        public ProductsController(IProductWriteRepository productWriteRepository,IProductReadRepository productReadRepository)
+        public ProductsController(IProductWriteRepository productWriteRepository, IProductReadRepository productReadRepository, IOrderWriteRepository orderWriteRepository, ICustomerWriteRepository customerWriteRepository,IOrderReadRepository orderReadRepository)
         {
             _productWriteRepository = productWriteRepository;
             _productReadRepository = productReadRepository;
+            _orderWriteRepository = orderWriteRepository;
+            _customerWriteRepository = customerWriteRepository;
+            _orderReadRepository = orderReadRepository;
         }
 
         [HttpGet]
-        public async void Get()
+        public async Task Get()
         {
-            _productWriteRepository.AddRangeAsync(new()
-            {
-                new() { Id = Guid.NewGuid(), Name = "Product1", Price = 100, CreateDate = DateTime.Now, Stock = 10 },
-                new() { Id = Guid.NewGuid(), Name = "Product2", Price = 200, CreateDate = DateTime.Now, Stock = 20 },
-                new() { Id = Guid.NewGuid(), Name = "Product3", Price = 300, CreateDate = DateTime.Now, Stock = 30 },
-            });
-            await _productWriteRepository.SaveAsync();
+            var customerId = Guid.NewGuid();
+            await _customerWriteRepository.AddAsync(new() { Id = customerId, Name = "Deneme" });
+
+            _orderWriteRepository.AddAsync(new() { Description = "deneme", Address = "İstanbul", CustomerId = customerId });
+            _orderWriteRepository.AddAsync(new() { Description = "deneme2", Address = "İstanbul2", CustomerId = customerId });
+            _orderWriteRepository.SaveAsync();
         }
+        
     }
 }
